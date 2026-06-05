@@ -1,68 +1,50 @@
 /**
  * firebase.js — Firestore real-time sync + localStorage fallback.
- *
- * Firebase config paste pannama irundhalum offline-a work aagum.
- * Config paste pannaa → multi-device real-time sync activate aagum.
- *
- * HOW TO SETUP:
- * 1. https://console.firebase.google.com → Create project
- * 2. Firestore Database → Create → Test mode
- * 3. Project Settings → Web app → Copy config → paste below
  */
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
-  authDomain: "warehouse-wms-f0fbe.firebaseapp.com",
-  projectId: "warehouse-wms-f0fbe",
-  storageBucket: "warehouse-wms-f0fbe.firebasestorage.app",
-  messagingSenderId: "446546235100",
-  appId: "1:446546235100:web:6733d5e17cbd20bed8ae19",
-  measurementId: "G-FRPG7PV27V"
+const FIREBASE_CONFIG = {
+  apiKey            : "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
+  authDomain        : "warehouse-wms-f0fbe.firebaseapp.com",
+  projectId         : "warehouse-wms-f0fbe",
+  storageBucket     : "warehouse-wms-f0fbe.firebasestorage.app",
+  messagingSenderId : "446546235100",
+  appId             : "1:446546235100:web:6733d5e17cbd20bed8ae19"
 };
 
 const FIRESTORE_DOC = 'warehouse/main';
 const LS_KEY        = 'wms_warehouse_data';
+
+/* ── moved outside IIFE so _isConfigured can access it ── */
+function _isFirebaseConfigured() {
+  return !Object.values(FIREBASE_CONFIG).some(v =>
+    typeof v === 'string' && v.startsWith('PASTE_YOUR')
+  );
+}
 
 const DB = (function () {
   let _db         = null;
   let _configured = false;
   let _onSyncCb   = null;
 
-  /* ── Check if config is filled ── */
-  function _isConfigured() {
-    return !Object.values(FIREBASE_CONFIG).some(v =>
-      typeof v === 'string' && v.startsWith('PASTE_YOUR')
-    );
-  }
-
-  /* ── Sync indicator helper ── */
   function _setIndicator(state, label) {
-    const dot   = document.getElementById('syncDot');
-    const lbl   = document.getElementById('syncLabel');
-    if (dot) { dot.className = 'sync-dot ' + state; }
-    if (lbl) { lbl.textContent = label; }
+    const dot = document.getElementById('syncDot');
+    const lbl = document.getElementById('syncLabel');
+    if (dot) dot.className = 'sync-dot ' + (state || '');
+    if (lbl) lbl.textContent = label || '';
   }
 
-  /* ══════════════════════════════
-     LOCAL STORAGE FALLBACK
-  ══════════════════════════════ */
+  /* ── localStorage fallback ── */
   function _localLoad() {
     try {
       const raw = localStorage.getItem(LS_KEY);
-      if (raw) {
-        State.loadFromCloud(JSON.parse(raw));
-      }
-    } catch (e) {
-      console.warn('WMS: localStorage read failed', e);
-    }
+      if (raw) State.loadFromCloud(JSON.parse(raw));
+    } catch (e) { console.warn('WMS: localStorage read failed', e); }
   }
 
   function _localSave() {
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(State.snapshot()));
-    } catch (e) {
-      console.warn('WMS: localStorage save failed', e);
-    }
+    } catch (e) { console.warn('WMS: localStorage save failed', e); }
   }
 
   function _initOffline(onReady) {
@@ -74,9 +56,7 @@ const DB = (function () {
     if (onReady) onReady();
   }
 
-  /* ══════════════════════════════
-     FIREBASE / FIRESTORE
-  ══════════════════════════════ */
+  /* ── Firestore real-time listener ── */
   function _listenRealtime(onReady) {
     const [col, doc] = FIRESTORE_DOC.split('/');
     let firstLoad = true;
@@ -86,36 +66,33 @@ const DB = (function () {
         if (snap.exists) {
           State.loadFromCloud(snap.data());
         } else {
-          /* First ever write */
           _db.collection(col).doc(doc).set(State.snapshot());
         }
 
-        _setIndicator('online', 'Cloud synced');
+        _setIndicator('online', 'Cloud synced ✓');
 
         if (firstLoad) {
           firstLoad = false;
           if (onReady) onReady();
         } else {
-          /* Remote update from another device */
           if (_onSyncCb) _onSyncCb();
-          UI.setLog('☁️ Synced from cloud — <strong>' + new Date().toLocaleTimeString() + '</strong>');
+          UI.setLog('☁️ Synced — <strong>' + new Date().toLocaleTimeString() + '</strong>');
         }
       },
       err => {
-        console.error('WMS: Firestore error', err);
+        console.error('WMS Firestore error:', err);
         _setIndicator('error', 'Sync error');
-        UI.setLog('⚠️ Cloud sync error — ' + err.message);
+        UI.setLog('⚠️ ' + err.message);
+        _initOffline(onReady);
       }
     );
   }
 
-  /* ══════════════════════════════
-     PUBLIC API
-  ══════════════════════════════ */
+  /* ── Public API ── */
   function init(onReady, onSync) {
     _onSyncCb = onSync;
 
-    if (!_isConfigured()) {
+    if (!_isFirebaseConfigured()) {
       _initOffline(onReady);
       return;
     }
@@ -125,10 +102,10 @@ const DB = (function () {
       _db         = firebase.firestore();
       _configured = true;
       _setIndicator('', 'Connecting...');
-      UI.setLog('🔗 Connecting to cloud...');
+      UI.setLog('🔗 Connecting to Firebase...');
       _listenRealtime(onReady);
     } catch (e) {
-      console.error('WMS: Firebase init error', e);
+      console.error('WMS Firebase init error:', e);
       _initOffline(onReady);
     }
   }
@@ -138,11 +115,12 @@ const DB = (function () {
       try {
         const [col, doc] = FIRESTORE_DOC.split('/');
         await _db.collection(col).doc(doc).set(State.snapshot());
-        _setIndicator('online', 'Cloud synced');
+        _setIndicator('online', 'Cloud synced ✓');
       } catch (e) {
-        console.error('WMS: Firestore save failed', e);
+        console.error('WMS save failed:', e);
         _setIndicator('error', 'Save failed');
-        UI.setLog('⚠️ Save failed — check internet connection');
+        _localSave();
+        UI.setLog('⚠️ Cloud save failed — saved locally as backup');
       }
     } else {
       _localSave();
