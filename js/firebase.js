@@ -1,20 +1,15 @@
-/**
- * firebase.js — Firestore real-time sync + localStorage fallback.
- */
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
-  authDomain: "warehouse-wms-f0fbe.firebaseapp.com",
-  projectId: "warehouse-wms-f0fbe",
-  storageBucket: "warehouse-wms-f0fbe.firebasestorage.app",
-  messagingSenderId: "446546235100",
-  appId: "1:446546235100:web:6733d5e17cbd20bed8ae19",
-  measurementId: "G-FRPG7PV27V"
+const FIREBASE_CONFIG = {
+  apiKey            : "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
+  authDomain        : "warehouse-wms-f0fbe.firebaseapp.com",
+  projectId         : "warehouse-wms-f0fbe",
+  storageBucket     : "warehouse-wms-f0fbe.firebasestorage.app",
+  messagingSenderId : "446546235100",
+  appId             : "1:446546235100:web:6733d5e17cbd20bed8ae19"
 };
+
 const FIRESTORE_DOC = 'warehouse/main';
 const LS_KEY        = 'wms_warehouse_data';
 
-/* ── moved outside IIFE so _isConfigured can access it ── */
 function _isFirebaseConfigured() {
   return !Object.values(FIREBASE_CONFIG).some(v =>
     typeof v === 'string' && v.startsWith('PASTE_YOUR')
@@ -33,7 +28,6 @@ const DB = (function () {
     if (lbl) lbl.textContent = label || '';
   }
 
-  /* ── localStorage fallback ── */
   function _localLoad() {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -56,7 +50,6 @@ const DB = (function () {
     if (onReady) onReady();
   }
 
-  /* ── Firestore real-time listener ── */
   function _listenRealtime(onReady) {
     const [col, doc] = FIRESTORE_DOC.split('/');
     let firstLoad = true;
@@ -68,9 +61,7 @@ const DB = (function () {
         } else {
           _db.collection(col).doc(doc).set(State.snapshot());
         }
-
         _setIndicator('online', 'Cloud synced ✓');
-
         if (firstLoad) {
           firstLoad = false;
           if (onReady) onReady();
@@ -88,15 +79,12 @@ const DB = (function () {
     );
   }
 
-  /* ── Public API ── */
   function init(onReady, onSync) {
     _onSyncCb = onSync;
-
     if (!_isFirebaseConfigured()) {
       _initOffline(onReady);
       return;
     }
-
     try {
       firebase.initializeApp(FIREBASE_CONFIG);
       _db         = firebase.firestore();
