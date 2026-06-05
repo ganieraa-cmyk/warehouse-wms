@@ -2,15 +2,15 @@
  * firebase.js — Firestore real-time sync + localStorage fallback.
  */
 
-const FIREBASE_CONFIG = {
-  apiKey            : "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
-  authDomain        : "warehouse-wms-f0fbe.firebaseapp.com",
-  projectId         : "warehouse-wms-f0fbe",
-  storageBucket     : "warehouse-wms-f0fbe.firebasestorage.app",
-  messagingSenderId : "446546235100",
-  appId             : "1:446546235100:web:6733d5e17cbd20bed8ae19"
+const firebaseConfig = {
+  apiKey: "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
+  authDomain: "warehouse-wms-f0fbe.firebaseapp.com",
+  projectId: "warehouse-wms-f0fbe",
+  storageBucket: "warehouse-wms-f0fbe.firebasestorage.app",
+  messagingSenderId: "446546235100",
+  appId: "1:446546235100:web:6733d5e17cbd20bed8ae19",
+  measurementId: "G-FRPG7PV27V"
 };
-
 const FIRESTORE_DOC = 'warehouse/main';
 const LS_KEY        = 'wms_warehouse_data';
 
