@@ -10,13 +10,14 @@
  * 3. Project Settings → Web app → Copy config → paste below
  */
 
-const FIREBASE_CONFIG = {
-  apiKey            : "PASTE_YOUR_apiKey_HERE",
-  authDomain        : "PASTE_YOUR_authDomain_HERE",
-  projectId         : "PASTE_YOUR_projectId_HERE",
-  storageBucket     : "PASTE_YOUR_storageBucket_HERE",
-  messagingSenderId : "PASTE_YOUR_messagingSenderId_HERE",
-  appId             : "PASTE_YOUR_appId_HERE"
+const firebaseConfig = {
+  apiKey: "AIzaSyAKCSK4isch_jds-wBaxt5BApNo3ZWPLus",
+  authDomain: "warehouse-wms-f0fbe.firebaseapp.com",
+  projectId: "warehouse-wms-f0fbe",
+  storageBucket: "warehouse-wms-f0fbe.firebasestorage.app",
+  messagingSenderId: "446546235100",
+  appId: "1:446546235100:web:6733d5e17cbd20bed8ae19",
+  measurementId: "G-FRPG7PV27V"
 };
 
 const FIRESTORE_DOC = 'warehouse/main';
