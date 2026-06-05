@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WMS — Warehouse Floor Layout</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">WMS<span>.</span>floor</div>
+  <span class="app-subtitle">Warehouse Inventory System</span>
+  <div class="sync-indicator">
+    <span class="sync-dot" id="syncDot"></span>
+    <span id="syncLabel">Starting...</span>
+  </div>
+  <nav class="header-right">
+    <button class="btn btn-danger" id="clearBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
+      Clear Data
+    </button>
+    <button class="btn" id="exportBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      Export Excel
+    </button>
+  </nav>
+</header>
+
+<!-- Shown only when Firebase is not configured -->
+<div id="configBanner" class="config-banner" style="display:none">
+  ⚠️ &nbsp;Firebase config not set — running in <strong>offline / single-device mode</strong>.
+  Open <code>js/firebase.js</code> and paste your Firebase config to enable multi-device sync.
+  &nbsp;<a href="https://console.firebase.google.com" target="_blank">Setup Firebase →</a>
+</div>
+
+<main class="main">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Bins</div>
+      <div class="stat-val">25</div>
+      <div class="stat-sub">A1 – E5</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Rows</div>
+      <div class="stat-val" id="st-rows">0</div>
+      <div class="stat-sub">across all bins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Putaway Done</div>
+      <div class="stat-val" id="st-put">0</div>
+      <div class="stat-sub">units stored</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Picks Done</div>
+      <div class="stat-val" id="st-pick">0</div>
+      <div class="stat-sub">units picked</div>
+    </div>
+  </div>
+
+  <div class="log-strip">
+    <div class="log-dot"></div>
+    <div id="logMsg">Starting up...</div>
+  </div>
+
+  <div id="floorRoot"></div>
+
+  <section class="tx-log-section">
+    <div class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      Transaction Log
+    </div>
+    <div class="tx-table-wrap">
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Time</th><th>Type</th><th>Bin</th>
+            <th>Row</th><th>SKU</th><th>Qty</th><th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="txBody">
+          <tr><td colspan="8" class="no-tx">No transactions yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Firebase SDK v8 compat -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- App -->
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/export.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
